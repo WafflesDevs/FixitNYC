@@ -8,11 +8,13 @@
   </head>
   <body>
     <header>
-      <h1>FixItNYC</h1>
-      <p class="muted">Functional prototype UI</p>
+      <div class="brand">
+        <h1>FixItNYC</h1>
+        <p class="muted">Staff &amp; client prototype</p>
+      </div>
       <div id="session-bar" class="hidden">
         <span id="session-label"></span>
-        <button type="button" id="btn-logout">Logout</button>
+        <button type="button" id="btn-logout" class="secondary">Logout</button>
       </div>
     </header>
 
@@ -31,27 +33,32 @@
       <p id="status" class="status" role="status"></p>
 
       <section id="view-auth" class="view">
-        <h2>Login</h2>
-        <form id="form-login">
-          <label>Email <input name="email" type="email" required /></label>
-          <label>Password <input name="password" type="password" required /></label>
-          <button type="submit">Login</button>
-        </form>
-
-        <h2>Register</h2>
-        <form id="form-register">
-          <label>Full name <input name="full_name" required maxlength="200" /></label>
-          <label>Email <input name="email" type="email" required /></label>
-          <label>Password <input name="password" type="password" required minlength="8" /></label>
-          <button type="submit">Register</button>
-        </form>
+        <div class="auth-grid">
+          <div class="auth-panel">
+            <h2>Login</h2>
+            <form id="form-login">
+              <label>Email <input name="email" type="email" required /></label>
+              <label>Password <input name="password" type="password" required /></label>
+              <button type="submit">Login</button>
+            </form>
+          </div>
+          <div class="auth-panel">
+            <h2>Register</h2>
+            <form id="form-register">
+              <label>Full name <input name="full_name" required maxlength="200" /></label>
+              <label>Email <input name="email" type="email" required /></label>
+              <label>Password <input name="password" type="password" required minlength="8" /></label>
+              <button type="submit">Register</button>
+            </form>
+          </div>
+        </div>
         <p class="muted">Staff bootstrap emails are configured server-side via BOOTSTRAP_STAFF_EMAILS.</p>
       </section>
 
       <section id="view-me" class="view hidden">
         <h2>Current user</h2>
         <pre id="me-output"></pre>
-        <button type="button" id="btn-refresh-me">Refresh /auth/me</button>
+        <button type="button" id="btn-refresh-me" class="secondary">Refresh /auth/me</button>
       </section>
 
       <section id="view-settings" class="view hidden">
@@ -100,7 +107,7 @@
 
       <section id="view-my-reports" class="view hidden">
         <h2>My reports</h2>
-        <button type="button" id="btn-load-my-reports">Reload</button>
+        <button type="button" id="btn-load-my-reports" class="secondary">Reload</button>
         <div id="my-reports-list"></div>
         <h3>Report detail</h3>
         <div id="my-report-detail"></div>
@@ -160,13 +167,13 @@
       <section id="view-staff-summary" class="view hidden">
         <h2>Summary</h2>
         <p class="muted">Uses the same filters as All reports (apply filters there first, or reload here).</p>
-        <button type="button" id="btn-load-summary">Load summary</button>
+        <button type="button" id="btn-load-summary" class="secondary">Load summary</button>
         <pre id="summary-output"></pre>
       </section>
 
       <section id="view-staff-accounts" class="view hidden">
         <h2>Accounts</h2>
-        <button type="button" id="btn-load-accounts">Reload</button>
+        <button type="button" id="btn-load-accounts" class="secondary">Reload</button>
         <div id="accounts-list"></div>
         <h3>Account detail / update</h3>
         <div id="account-detail"></div>

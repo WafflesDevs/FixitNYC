@@ -54,7 +54,7 @@ async def create_report(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create report",
         )
-    return to_report_detail(rows[0], include_signed_url=False)
+    return to_report_detail(rows[0], include_signed_url=True)
 
 
 @router.get("", response_model=list[ReportListItem])

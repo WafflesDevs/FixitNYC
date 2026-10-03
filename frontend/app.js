@@ -191,6 +191,9 @@
     $("view-auth").classList.remove("hidden");
     $("nav").classList.add("hidden");
     $("session-bar").classList.add("hidden");
+    document.querySelectorAll("#nav button[data-view]").forEach((btn) => {
+      btn.classList.remove("active");
+    });
   }
 
   function showApp(user) {
@@ -216,6 +219,21 @@
     document.querySelectorAll(".view").forEach((el) => el.classList.add("hidden"));
     const view = $(`view-${name}`);
     if (view) view.classList.remove("hidden");
+    document.querySelectorAll("#nav button[data-view]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-view") === name);
+    });
+  }
+
+  function badgeHtml(kind, value) {
+    const safe = escapeHtml(value);
+    return `<span class="badge badge-${kind} badge-${kind}-${safe}">${safe}</span>`;
+  }
+
+  function formatWhen(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString();
   }
 
   function renderMe(user) {
@@ -249,24 +267,25 @@
   }
 
   function reportRowsHtml(reports, onClickAttr, { staff = false } = {}) {
-    if (!reports.length) return "<p>No reports.</p>";
+    if (!reports.length) return "<p class=\"muted\">No reports.</p>";
     const rows = reports
       .map(
         (r) => `
       <tr>
-        <td><button type="button" ${onClickAttr}="${escapeHtml(r.id)}">Open</button></td>
-        <td>${escapeHtml(r.priority)}</td>
-        <td>${escapeHtml(r.status)}</td>
+        <td><button type="button" class="secondary" ${onClickAttr}="${escapeHtml(r.id)}">Open</button></td>
+        <td>${badgeHtml("priority", r.priority)}</td>
+        <td>${badgeHtml("status", r.status)}</td>
         <td>${escapeHtml(r.city)}</td>
         <td>${escapeHtml(r.problem_type)}</td>
         <td>${escapeHtml(r.name)}</td>
         ${staff ? `<td>${escapeHtml(reporterLabel(r))}</td>` : ""}
         <td>${escapeHtml(r.address_area)}</td>
-        <td>${escapeHtml(r.reported_at)}</td>
+        <td>${escapeHtml(formatWhen(r.reported_at))}</td>
       </tr>`,
       )
       .join("");
     return `
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -277,7 +296,8 @@
           </tr>
         </thead>
         <tbody>${rows}</tbody>
-      </table>`;
+      </table>
+      </div>`;
   }
 
   function renderReportDetail(container, report, { staff = false } = {}) {
@@ -315,13 +335,13 @@
       <article class="report-detail">
         <dl class="report-meta">
           <div><dt>ID</dt><dd>${escapeHtml(report.id)}</dd></div>
-          <div><dt>Priority</dt><dd>${escapeHtml(report.priority)}</dd></div>
-          <div><dt>Status</dt><dd>${escapeHtml(report.status)}</dd></div>
+          <div><dt>Priority</dt><dd>${badgeHtml("priority", report.priority)}</dd></div>
+          <div><dt>Status</dt><dd>${badgeHtml("status", report.status)}</dd></div>
           <div><dt>City</dt><dd>${escapeHtml(report.city)}</dd></div>
           <div><dt>Problem</dt><dd>${escapeHtml(report.problem_type)}</dd></div>
           <div><dt>Name</dt><dd>${escapeHtml(report.name)}</dd></div>
           <div><dt>Address</dt><dd>${escapeHtml(report.address_area)}</dd></div>
-          <div><dt>Reported</dt><dd>${escapeHtml(report.reported_at)}</dd></div>
+          <div><dt>Reported</dt><dd>${escapeHtml(formatWhen(report.reported_at))}</dd></div>
           ${
             staff
               ? `<div><dt>Reporter</dt><dd>${escapeHtml(reporterLabel(report))}</dd></div>`
@@ -588,6 +608,7 @@
       return;
     }
     list.innerHTML = `
+      <div class="table-wrap">
       <table>
         <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>ID</th></tr></thead>
         <tbody>
@@ -595,7 +616,7 @@
             .map(
               (a) => `
             <tr>
-              <td><button type="button" data-account="${escapeHtml(a.id)}">Open</button></td>
+              <td><button type="button" class="secondary" data-account="${escapeHtml(a.id)}">Open</button></td>
               <td>${escapeHtml(a.full_name)}</td>
               <td>${escapeHtml(a.email)}</td>
               <td>${escapeHtml(a.role)}</td>
@@ -604,7 +625,8 @@
             )
             .join("")}
         </tbody>
-      </table>`;
+      </table>
+      </div>`;
     list.querySelectorAll("[data-account]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         try {

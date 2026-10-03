@@ -2,6 +2,9 @@
   "plugins": {
     "supabase": {
       "enabled": true
+    },
+    "figma": {
+      "enabled": true
     }
   }
 }
