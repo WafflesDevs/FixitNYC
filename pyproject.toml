@@ -1,0 +1,16 @@
+[project]
+name = "fixitnyc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "torch>=2.14.1",
+]
+
+[project.scripts]
+fixitnyc = "fixitnyc:main"
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
