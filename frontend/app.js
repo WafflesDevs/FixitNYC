@@ -9,6 +9,7 @@
 
   let currentUser = null;
   let myReports = [];
+  let selectedMyReportId = null;
   let vortexConversationId = null;
   let vortexConversations = [];
   let lastStaffFilters = {};
@@ -115,6 +116,7 @@
     rememberVortexConversation(null);
     vortexConversations = [];
     myReports = [];
+    selectedMyReportId = null;
     const log = $("vortex-log");
     if (log) log.innerHTML = "";
     const list = $("vortex-conversations");
@@ -191,6 +193,7 @@
 
     const response = await fetch(`${API_BASE}${path}`, {
       ...options,
+      cache: options.cache || "no-store",
       headers,
       body: options.json !== undefined ? JSON.stringify(options.json) : options.body,
     });
@@ -366,16 +369,18 @@
         try {
           setStatus("Loading report…");
           const reportId = btn.getAttribute("data-report-id");
-          const report = await api(
-            staff ? `/staff/reports/${reportId}` : `/reports/${reportId}`,
-          );
-          if (container.id === "dash-recent") {
-            showView("past");
-            renderReportDetail($("past-detail"), report);
-          } else if (container.id === "past-list") {
-            renderReportDetail($("past-detail"), report);
+          if (staff) {
+            const report = await api(`/staff/reports/${reportId}`);
+            renderReportDetail(container, report, { staff: true });
           } else {
-            renderReportDetail(container, report, { staff });
+            selectedMyReportId = reportId;
+            if (container.id === "dash-recent") {
+              showView("past");
+              await loadMyReports();
+            } else {
+              const report = await api(`/reports/${reportId}`);
+              renderReportDetail($("past-detail"), report);
+            }
           }
           setStatus("Loaded report detail.");
         } catch (err) {
@@ -418,7 +423,8 @@
             <span>Status</span>
             <select name="status">
               ${REPORT_STATUSES.map(
-                (s) => `<option value="${s}" ${s === report.status ? "selected" : ""}>${s}</option>`,
+                (s) =>
+                  `<option value="${s}" ${s === report.status ? "selected" : ""}>${escapeHtml(statusLabel(s))}</option>`,
               ).join("")}
             </select>
           </label>
@@ -479,12 +485,35 @@
     }
   }
 
+  async function refreshSelectedMyReportDetail() {
+    const slot = $("past-detail");
+    if (!slot) return;
+    if (!selectedMyReportId) {
+      slot.innerHTML = "";
+      return;
+    }
+    const stillMine = myReports.some((r) => String(r.id) === String(selectedMyReportId));
+    if (!stillMine) {
+      selectedMyReportId = null;
+      slot.innerHTML = "";
+      return;
+    }
+    try {
+      const report = await api(`/reports/${selectedMyReportId}`);
+      renderReportDetail(slot, report);
+    } catch {
+      selectedMyReportId = null;
+      slot.innerHTML = "";
+    }
+  }
+
   async function loadMyReports() {
     myReports = await api("/reports");
     renderStatusCards("dash", myReports);
     renderStatusCards("past", myReports);
     renderReportList($("dash-recent"), myReports.slice(0, 4));
     applyPastFilters();
+    await refreshSelectedMyReportDetail();
     return myReports;
   }
 
