@@ -3,192 +3,765 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FixItNYC Prototype</title>
+    <title>FixitiNYC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <div class="brand">
-        <h1>FixItNYC</h1>
-        <p class="muted">Staff &amp; client prototype</p>
-      </div>
-      <div id="session-bar" class="hidden">
-        <span id="session-label"></span>
-        <button type="button" id="btn-logout" class="secondary">Logout</button>
-      </div>
-    </header>
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-    <nav id="nav" class="hidden">
-      <button type="button" data-view="me">Me</button>
-      <button type="button" data-view="settings">Settings</button>
-      <button type="button" data-view="submit">Submit report</button>
-      <button type="button" data-view="my-reports">My reports</button>
-      <button type="button" data-view="staff-reports" class="staff-only hidden">All reports</button>
-      <button type="button" data-view="staff-summary" class="staff-only hidden">Summary</button>
-      <button type="button" data-view="staff-accounts" class="staff-only hidden">Accounts</button>
-      <button type="button" data-view="vortex" class="staff-only hidden">Vortex</button>
-    </nav>
+    <!-- ========== Public auth ========== -->
+    <div id="shell-auth" class="shell-auth">
+      <div class="auth-layout">
+        <div class="auth-pane">
+          <header class="auth-header">
+            <img
+              class="logo-login"
+              src="assets/logo.png"
+              alt="FixIt NYC"
+              width="188"
+              height="188"
+            />
+            <nav class="auth-header-links" aria-label="Public shortcuts">
+              <button type="button" class="auth-pill-link" id="btn-anonymous-login">
+                Anonymous Report
+              </button>
+              <button type="button" class="auth-text-link" data-public-help>Help</button>
+              <button type="button" class="auth-text-link" data-legal="privacy">Privacy</button>
+            </nav>
+          </header>
 
-    <main>
-      <p id="status" class="status" role="status"></p>
+          <main class="auth-main">
+            <div class="auth-mode-tabs" id="auth-mode-tabs" role="tablist" aria-label="Account">
+              <button type="button" class="auth-mode-tab active" data-show-auth="login" role="tab" aria-selected="true">
+                Sign in
+              </button>
+              <button type="button" class="auth-mode-tab" data-show-auth="register" role="tab" aria-selected="false">
+                Create account
+              </button>
+            </div>
 
-      <section id="view-auth" class="view">
-        <div class="auth-grid">
-          <div class="auth-panel">
-            <h2>Login</h2>
-            <form id="form-login">
-              <label>Email <input name="email" type="email" required /></label>
-              <label>Password <input name="password" type="password" required /></label>
-              <button type="submit">Login</button>
-            </form>
+            <section id="auth-login" class="auth-panel" role="tabpanel">
+              <div class="sign-intro">
+                <h1>Welcome to FixitiNYC</h1>
+                <p>Your neighborhood reporting assistant for New York City.</p>
+              </div>
+              <form id="form-login" class="credentials">
+                <label class="field">
+                  <span>Email address</span>
+                  <input name="email" type="email" required placeholder="you@example.com" autocomplete="username" />
+                </label>
+                <div class="password-block">
+                  <label class="field">
+                    <span>Password</span>
+                    <input
+                      id="login-password"
+                      name="password"
+                      type="password"
+                      required
+                      placeholder="Enter your password"
+                      autocomplete="current-password"
+                    />
+                  </label>
+                  <div class="password-actions">
+                    <button type="button" class="show-password" data-toggle-password="login-password">
+                      <img src="assets/icon-eye.svg" alt="" width="18" height="18" />
+                      Show password
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" class="btn-primary btn-block btn-auth">
+                  Continue with email
+                  <img src="assets/icon-arrow-right.svg" alt="" width="18" height="18" />
+                </button>
+              </form>
+            </section>
+
+            <section id="auth-register" class="auth-panel hidden" role="tabpanel">
+              <div class="sign-intro">
+                <h1>Create your account</h1>
+                <p>Report issues and track progress in your neighborhood.</p>
+              </div>
+              <form id="form-register" class="credentials">
+                <label class="field">
+                  <span>Full name</span>
+                  <input name="full_name" required maxlength="200" placeholder="Jordan Lee" autocomplete="name" />
+                </label>
+                <label class="field">
+                  <span>Email address</span>
+                  <input name="email" type="email" required placeholder="you@example.com" autocomplete="email" />
+                </label>
+                <div class="password-block">
+                  <label class="field">
+                    <span>Password</span>
+                    <input
+                      id="register-password"
+                      name="password"
+                      type="password"
+                      required
+                      minlength="8"
+                      placeholder="At least 8 characters"
+                      autocomplete="new-password"
+                    />
+                  </label>
+                  <div class="password-actions">
+                    <button type="button" class="show-password" data-toggle-password="register-password">
+                      <img src="assets/icon-eye.svg" alt="" width="18" height="18" />
+                      Show password
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" class="btn-primary btn-block btn-auth">
+                  Create account
+                  <img src="assets/icon-arrow-right.svg" alt="" width="18" height="18" />
+                </button>
+              </form>
+            </section>
+
+            <section id="auth-anonymous" class="auth-panel auth-panel-scroll hidden">
+              <div class="sign-intro">
+                <h1>Anonymous Report</h1>
+                <p>Submit without creating an account. No address is required.</p>
+              </div>
+              <form id="form-anonymous" class="credentials">
+                <label class="field">
+                  <span>Name</span>
+                  <input name="name" required maxlength="200" placeholder="Your name" />
+                </label>
+                <label class="field">
+                  <span>Email <span class="optional">(optional)</span></span>
+                  <input name="contact_email" type="email" maxlength="320" placeholder="you@example.com" />
+                </label>
+                <label class="field">
+                  <span>Type of incident</span>
+                  <select name="problem_type" required>
+                    <option value="sanitation">Sanitation</option>
+                    <option value="infrastructure">Infrastructure</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Describe it</span>
+                  <textarea name="additional_info" rows="4" required maxlength="5000" placeholder="What happened?"></textarea>
+                </label>
+                <label class="field">
+                  <span>Photo <span class="optional">(optional)</span></span>
+                  <input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+                </label>
+                <button type="submit" class="btn-primary btn-block btn-auth">
+                  Submit report
+                  <img src="assets/icon-arrow-right.svg" alt="" width="18" height="18" />
+                </button>
+              </form>
+              <div id="anonymous-success" class="success-banner hidden">
+                <strong>Report submitted.</strong>
+                <p>Thank you. Staff can review anonymous reports; they will not appear in a personal past-reports list.</p>
+                <p class="mono" id="anonymous-report-id"></p>
+              </div>
+              <p class="auth-switch-note">
+                Prefer an account?
+                <button type="button" class="inline-link" data-show-auth="login">Sign in</button>
+              </p>
+            </section>
+
+            <section id="auth-public-help" class="auth-panel auth-panel-scroll auth-help hidden">
+              <div class="sign-intro">
+                <h1>Help center</h1>
+                <p>Quick answers before you sign in.</p>
+              </div>
+              <div class="help-static">
+                <article>
+                  <h2>How reporting works</h2>
+                  <p>Describe the issue, add a location when signed in, and optionally attach a photo. Staff triage sanitation and infrastructure reports.</p>
+                </article>
+                <article>
+                  <h2>Anonymous Report</h2>
+                  <p>Use Anonymous Report in the header to submit without an account. You will not get a personal history of those reports.</p>
+                </article>
+                <article>
+                  <h2>Emergencies</h2>
+                  <p>If someone is in immediate danger, call 911. FixitiNYC is not an emergency service.</p>
+                </article>
+              </div>
+              <button type="button" class="btn-secondary" data-show-auth="login">Back to sign in</button>
+            </section>
+          </main>
+
+          <footer class="auth-pane-footer">
+            <p>© 2026 FixitiNYC · Independent platform, not affiliated with NYC government.</p>
+            <div class="auth-footer-links">
+              <button type="button" class="inline-link" data-legal="terms">Terms</button>
+              <button type="button" class="inline-link" data-legal="privacy">Privacy</button>
+            </div>
+          </footer>
+        </div>
+
+        <aside class="auth-visual" aria-hidden="true">
+          <div class="auth-visual-frame">
+            <img
+              class="auth-visual-image"
+              src="assets/hero-login.jpg"
+              alt=""
+              width="1600"
+              height="1067"
+            />
+            <div class="auth-visual-overlay">
+              <p class="auth-visual-kicker">Neighborhood care</p>
+              <p class="auth-visual-title">For New York. For your block.</p>
+            </div>
           </div>
-          <div class="auth-panel">
-            <h2>Register</h2>
-            <form id="form-register">
-              <label>Full name <input name="full_name" required maxlength="200" /></label>
-              <label>Email <input name="email" type="email" required /></label>
-              <label>Password <input name="password" type="password" required minlength="8" /></label>
-              <button type="submit">Register</button>
-            </form>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ========== Signed-in app ========== -->
+    <div id="shell-app" class="shell-app hidden">
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="sidebar-main">
+          <div class="sidebar-brand">
+            <img src="assets/logo.png" alt="FixIt NYC" width="180" height="58" />
+          </div>
+          <div class="workspace-label">Resident workspace</div>
+          <nav id="nav" class="nav-links">
+            <button type="button" class="nav-item active" data-view="dashboard">
+              <img src="assets/icon-dashboard.svg" alt="" width="20" height="20" />
+              <span>Dashboard</span>
+            </button>
+            <button type="button" class="nav-item" data-view="report">
+              <img src="assets/icon-plus-circle.svg" alt="" width="20" height="20" />
+              <span>Report a new issue</span>
+            </button>
+            <button type="button" class="nav-item" data-view="past">
+              <img src="assets/icon-clipboard.svg" alt="" width="20" height="20" />
+              <span>Past reports</span>
+              <span class="nav-count" id="nav-report-count">0</span>
+            </button>
+            <button type="button" class="nav-item staff-only hidden" data-view="vortex">
+              <img src="assets/icon-chat.svg" alt="" width="20" height="20" />
+              <span>AI assistant</span>
+            </button>
+            <button type="button" class="nav-item" data-view="settings">
+              <img src="assets/icon-settings.svg" alt="" width="20" height="20" />
+              <span>Settings</span>
+            </button>
+          </nav>
+          <div class="nav-divider"></div>
+          <button type="button" class="nav-item" data-view="help">
+            <img src="assets/icon-help.svg" alt="" width="20" height="20" />
+            <span>Help center</span>
+          </button>
+          <div class="staff-nav staff-only hidden">
+            <div class="workspace-label">Staff tools</div>
+            <button type="button" class="nav-item" data-view="staff-reports">
+              <img src="assets/icon-clipboard.svg" alt="" width="20" height="20" />
+              <span>All reports</span>
+            </button>
+            <button type="button" class="nav-item" data-view="staff-summary">
+              <img src="assets/icon-inbox.svg" alt="" width="20" height="20" />
+              <span>Summary</span>
+            </button>
+            <button type="button" class="nav-item" data-view="staff-accounts">
+              <img src="assets/icon-settings.svg" alt="" width="20" height="20" />
+              <span>Accounts</span>
+            </button>
           </div>
         </div>
-        <p class="muted">Staff bootstrap emails are configured server-side via BOOTSTRAP_STAFF_EMAILS.</p>
-      </section>
+        <div class="sidebar-footer">
+          <div class="support-card">
+            <img src="assets/icon-messages.svg" alt="" width="24" height="24" />
+            <h3>Need a hand?</h3>
+            <p>Tips for clearer reports and what happens after you submit.</p>
+            <button type="button" class="btn-secondary btn-small" data-view="help">Open help</button>
+          </div>
+          <div class="account-chip">
+            <div class="avatar" id="account-avatar">?</div>
+            <div class="account-meta">
+              <div class="account-name" id="account-name">Resident</div>
+              <div class="account-role" id="account-role">Resident account</div>
+            </div>
+            <button type="button" id="btn-logout" class="icon-btn" title="Log out" aria-label="Log out">
+              <img src="assets/icon-logout.svg" alt="" width="18" height="18" />
+            </button>
+          </div>
+        </div>
+      </aside>
 
-      <section id="view-me" class="view hidden">
-        <h2>Current user</h2>
-        <pre id="me-output"></pre>
-        <button type="button" id="btn-refresh-me" class="secondary">Refresh /auth/me</button>
-      </section>
+      <div class="workspace">
+        <header class="workspace-header">
+          <div class="breadcrumb">
+            <span>Workspace</span>
+            <img src="assets/icon-chevron-right.svg" alt="" width="14" height="14" />
+            <strong id="breadcrumb-page">Dashboard</strong>
+          </div>
+        </header>
 
-      <section id="view-settings" class="view hidden">
-        <h2>Update profile</h2>
-        <form id="form-settings">
-          <label>Full name <input name="full_name" maxlength="200" /></label>
-          <label>Email <input name="email" type="email" /></label>
-          <button type="submit">Save</button>
-        </form>
+        <main class="workspace-main">
+          <!-- Dashboard -->
+          <section id="view-dashboard" class="view">
+            <div class="page-intro">
+              <div>
+                <h1 id="dash-greeting">Welcome back</h1>
+                <p>Track neighborhood reports and submit new issues.</p>
+              </div>
+              <p class="page-date" id="page-date"></p>
+            </div>
 
-        <h2>Change password</h2>
-        <form id="form-password">
-          <label>New password <input name="password" type="password" required minlength="8" /></label>
-          <button type="submit">Update password</button>
-        </form>
-      </section>
+            <div class="invite-card">
+              <div class="invite-copy">
+                <p class="eyebrow">Neighborhood reporting</p>
+                <h2>See something that needs fixing?</h2>
+                <p>File a sanitation or infrastructure report with optional photos. Most submissions take a few minutes.</p>
+                <div class="invite-actions">
+                  <button type="button" class="btn-primary" data-view="report">
+                    <img src="assets/icon-plus.svg" alt="" width="18" height="18" />
+                    Report a new issue
+                  </button>
+                  <span class="muted">About 3 minutes</span>
+                </div>
+              </div>
+              <img class="invite-image" src="assets/hero.png" alt="" />
+            </div>
 
-      <section id="view-submit" class="view hidden">
-        <h2>Submit report</h2>
-        <form id="form-report">
-          <label>Address / area <input name="address_area" required maxlength="500" /></label>
-          <label>
-            City (borough)
-            <select name="city" required>
-              <option value="Manhattan">Manhattan</option>
-              <option value="Brooklyn">Brooklyn</option>
-              <option value="Queens">Queens</option>
-              <option value="Bronx">Bronx</option>
-              <option value="Staten Island">Staten Island</option>
-            </select>
-          </label>
-          <label>Name <input name="name" required maxlength="200" /></label>
-          <label>
-            Problem type
-            <select name="problem_type" required>
-              <option value="sanitation">sanitation</option>
-              <option value="infrastructure">infrastructure</option>
-            </select>
-          </label>
-          <label>Additional info <textarea name="additional_info" rows="3"></textarea></label>
-          <label>Image (jpeg/png/webp) <input name="image" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
-          <button type="submit">Submit</button>
-        </form>
-        <pre id="submit-output"></pre>
-      </section>
+            <div class="status-cards" id="dash-status-cards">
+              <article class="status-card">
+                <div class="status-icon"><img src="assets/icon-inbox.svg" alt="" width="22" height="22" /></div>
+                <div>
+                  <div class="metric"><span id="count-submitted">0</span> <span>Submitted</span></div>
+                  <p class="muted">Waiting for review</p>
+                </div>
+              </article>
+              <article class="status-card">
+                <div class="status-icon"><img src="assets/icon-clock.svg" alt="" width="22" height="22" /></div>
+                <div>
+                  <div class="metric"><span id="count-progress">0</span> <span>In progress</span></div>
+                  <p class="muted">Reviewed or actively worked</p>
+                </div>
+              </article>
+              <article class="status-card">
+                <div class="status-icon"><img src="assets/icon-check-circle.svg" alt="" width="22" height="22" /></div>
+                <div>
+                  <div class="metric"><span id="count-resolved">0</span> <span>Resolved</span></div>
+                  <p class="muted">Marked done</p>
+                </div>
+              </article>
+            </div>
 
-      <section id="view-my-reports" class="view hidden">
-        <h2>My reports</h2>
-        <button type="button" id="btn-load-my-reports" class="secondary">Reload</button>
-        <div id="my-reports-list"></div>
-        <h3>Report detail</h3>
-        <div id="my-report-detail"></div>
-      </section>
+            <div class="dash-split">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Recent reports</h2>
+                    <p class="muted">Your latest submissions</p>
+                  </div>
+                  <button type="button" class="text-action" data-view="past">
+                    View all reports
+                    <img src="assets/icon-arrow-right.svg" alt="" width="16" height="16" />
+                  </button>
+                </div>
+                <div id="dash-recent" class="report-list"></div>
+              </div>
+              <aside class="side-stack">
+                <div class="panel compact">
+                  <div class="card-title">
+                    <img src="assets/icon-settings.svg" alt="" width="20" height="20" />
+                    <h3>Account settings</h3>
+                  </div>
+                  <p class="muted">Update your name, email, or password.</p>
+                  <button type="button" class="text-action" data-view="settings">
+                    Open settings
+                    <img src="assets/icon-arrow-right.svg" alt="" width="16" height="16" />
+                  </button>
+                </div>
+                <div class="panel compact">
+                  <div class="card-title">
+                    <img src="assets/icon-lightbulb.svg" alt="" width="20" height="20" />
+                    <h3>Reporting tip</h3>
+                  </div>
+                  <p class="muted">Clear photos and landmarks help crews find the problem faster.</p>
+                  <div class="divider"></div>
+                  <p class="warn-note">For emergencies, call 911 — not FixitiNYC.</p>
+                </div>
+              </aside>
+            </div>
+          </section>
 
-      <section id="view-staff-reports" class="view hidden">
-        <h2>All reports</h2>
-        <p class="muted">Every submitted report across all users. Open one to view the image and update priority/status.</p>
-        <form id="form-staff-filters" class="filters">
-          <label>
-            City
-            <select name="city">
-              <option value="">(any)</option>
-              <option value="Manhattan">Manhattan</option>
-              <option value="Brooklyn">Brooklyn</option>
-              <option value="Queens">Queens</option>
-              <option value="Bronx">Bronx</option>
-              <option value="Staten Island">Staten Island</option>
-            </select>
-          </label>
-          <label>
-            Problem
-            <select name="problem_type">
-              <option value="">(any)</option>
-              <option value="sanitation">sanitation</option>
-              <option value="infrastructure">infrastructure</option>
-            </select>
-          </label>
-          <label>
-            Status
-            <select name="status">
-              <option value="">(any)</option>
-              <option value="submitted">submitted</option>
-              <option value="reviewed">reviewed</option>
-              <option value="in_progress">in_progress</option>
-              <option value="canceled">canceled</option>
-              <option value="done">done</option>
-            </select>
-          </label>
-          <label>
-            Priority
-            <select name="priority">
-              <option value="">(any)</option>
-              <option value="high">high</option>
-              <option value="low">low</option>
-            </select>
-          </label>
-          <label>Reported after <input name="reported_after" type="datetime-local" /></label>
-          <label>Reported before <input name="reported_before" type="datetime-local" /></label>
-          <button type="submit">Apply filters</button>
-        </form>
-        <div id="staff-reports-list"></div>
-        <h3>Report detail</h3>
-        <div id="staff-report-detail"></div>
-      </section>
+          <!-- Report -->
+          <section id="view-report" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>Report a new issue</h1>
+                <p>Tell us what you see. Only sanitation and infrastructure are accepted by the API.</p>
+              </div>
+            </div>
+            <div class="content-split">
+              <form id="form-report" class="panel form-panel">
+                <div class="section-intro">
+                  <h2>Issue details</h2>
+                  <p class="muted">Required fields are stored with your report.</p>
+                </div>
+                <label class="field">
+                  <span>Issue type</span>
+                  <select name="problem_type" required>
+                    <option value="sanitation">Sanitation</option>
+                    <option value="infrastructure">Infrastructure</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Description</span>
+                  <textarea name="additional_info" rows="4" placeholder="Describe the issue clearly"></textarea>
+                  <span class="field-help">What is wrong, and anything crews should know.</span>
+                </label>
+                <div class="divider"></div>
+                <div class="section-label">
+                  <img src="assets/icon-construction.svg" alt="" width="20" height="20" />
+                  <h3>Location</h3>
+                </div>
+                <label class="field">
+                  <span>Street address</span>
+                  <input name="address_area" required maxlength="500" placeholder="123 Main St" />
+                  <span class="field-help">Street and nearby cross streets work well.</span>
+                </label>
+                <div class="field-row">
+                  <label class="field">
+                    <span>Borough</span>
+                    <select name="city" required>
+                      <option value="Manhattan">Manhattan</option>
+                      <option value="Brooklyn">Brooklyn</option>
+                      <option value="Queens">Queens</option>
+                      <option value="Bronx">Bronx</option>
+                      <option value="Staten Island">Staten Island</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Nearby landmark <span class="optional">(optional)</span></span>
+                    <input name="landmark" maxlength="200" placeholder="Across from the park" />
+                  </label>
+                </div>
+                <div class="photo-upload">
+                  <span class="field-label">Photo <span class="optional">(optional)</span></span>
+                  <label class="upload-area">
+                    <img src="assets/icon-image-plus.svg" alt="" width="26" height="26" />
+                    <span>Add one photo</span>
+                    <span class="muted">JPEG, PNG, or WebP</span>
+                    <input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
+                  </label>
+                  <span class="field-help" id="report-image-name">No file selected</span>
+                </div>
+                <label class="confirm-row">
+                  <input type="checkbox" name="accuracy" required />
+                  <span>I confirm this information is accurate to the best of my knowledge.</span>
+                </label>
+                <div class="form-actions">
+                  <button type="button" class="btn-secondary" data-view="dashboard">Cancel</button>
+                  <button type="submit" class="btn-primary">
+                    <img src="assets/icon-plus.svg" alt="" width="18" height="18" />
+                    Submit report
+                  </button>
+                </div>
+              </form>
+              <aside class="side-stack">
+                <div class="panel compact alert-panel">
+                  <img src="assets/icon-alert.svg" alt="" width="20" height="20" />
+                  <div>
+                    <h3>Stay safe</h3>
+                    <p class="muted">Do not put yourself at risk to take a photo. Call 911 for emergencies.</p>
+                  </div>
+                </div>
+                <div class="panel compact">
+                  <h3>How reporting works</h3>
+                  <p class="muted">Three steps from submit to follow-up.</p>
+                  <ol class="steps">
+                    <li><strong>Describe</strong><span>Type and details</span></li>
+                    <li><strong>Locate</strong><span>Address and borough</span></li>
+                    <li><strong>Optional photo</strong><span>One image helps</span></li>
+                  </ol>
+                </div>
+              </aside>
+            </div>
+          </section>
 
-      <section id="view-staff-summary" class="view hidden">
-        <h2>Summary</h2>
-        <p class="muted">Uses the same filters as All reports (apply filters there first, or reload here).</p>
-        <button type="button" id="btn-load-summary" class="secondary">Load summary</button>
-        <pre id="summary-output"></pre>
-      </section>
+          <!-- Past reports -->
+          <section id="view-past" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>Past reports</h1>
+                <p>Search and filter your submissions. Report IDs are UUIDs.</p>
+              </div>
+            </div>
+            <div class="status-cards compact-cards" id="past-status-cards"></div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Report history</h2>
+                  <p class="muted">Click a row for detail and photo</p>
+                </div>
+                <button type="button" class="btn-primary" data-view="report">
+                  <img src="assets/icon-plus.svg" alt="" width="18" height="18" />
+                  Report a new issue
+                </button>
+              </div>
+              <div class="filters-bar">
+                <label class="search-field">
+                  <img src="assets/icon-search.svg" alt="" width="18" height="18" />
+                  <input id="past-search" type="search" placeholder="Search address, type, or status" />
+                </label>
+                <select id="past-filter-status">
+                  <option value="">All statuses</option>
+                  <option value="submitted">Submitted</option>
+                  <option value="reviewed">Reviewed</option>
+                  <option value="in_progress">In progress</option>
+                  <option value="done">Resolved</option>
+                  <option value="canceled">Canceled</option>
+                </select>
+                <select id="past-filter-type">
+                  <option value="">All types</option>
+                  <option value="sanitation">Sanitation</option>
+                  <option value="infrastructure">Infrastructure</option>
+                </select>
+              </div>
+              <div id="past-list" class="report-list wide"></div>
+              <div id="past-detail" class="report-detail-slot"></div>
+            </div>
+          </section>
 
-      <section id="view-staff-accounts" class="view hidden">
-        <h2>Accounts</h2>
-        <button type="button" id="btn-load-accounts" class="secondary">Reload</button>
-        <div id="accounts-list"></div>
-        <h3>Account detail / update</h3>
-        <div id="account-detail"></div>
-      </section>
+          <!-- Settings -->
+          <section id="view-settings" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>Settings</h1>
+                <p>Update the profile fields supported by the API.</p>
+              </div>
+            </div>
+            <div class="content-split">
+              <div class="stack">
+                <form id="form-settings" class="panel form-panel">
+                  <div class="section-intro">
+                    <h2>Profile</h2>
+                    <p class="muted">Name and email are stored on your account.</p>
+                  </div>
+                  <label class="field">
+                    <span>Full name</span>
+                    <input name="full_name" maxlength="200" required />
+                  </label>
+                  <label class="field">
+                    <span>Email</span>
+                    <input name="email" type="email" required />
+                    <span class="field-help">Used for sign-in.</span>
+                  </label>
+                  <div class="form-actions end">
+                    <button type="submit" class="btn-primary">Save changes</button>
+                  </div>
+                </form>
+                <form id="form-password" class="panel form-panel">
+                  <div class="section-intro">
+                    <h2>Password</h2>
+                    <p class="muted">Choose a new password with at least 8 characters.</p>
+                  </div>
+                  <label class="field">
+                    <span>New password</span>
+                    <input name="password" type="password" required minlength="8" autocomplete="new-password" />
+                  </label>
+                  <div class="form-actions end">
+                    <button type="submit" class="btn-secondary">Update password</button>
+                  </div>
+                </form>
+              </div>
+              <aside class="side-stack">
+                <div class="panel compact profile-card">
+                  <div class="avatar large" id="settings-avatar">?</div>
+                  <h3 id="settings-name">Resident</h3>
+                  <p class="muted" id="settings-role">Resident account</p>
+                  <p class="muted" id="settings-email"></p>
+                </div>
+              </aside>
+            </div>
+          </section>
 
-      <section id="view-vortex" class="view hidden">
-        <h2>Vortex chat</h2>
-        <p class="muted">Transcript is saved and restored. Replies render as notes from live report data.</p>
-        <div id="vortex-log" class="chat-log" aria-live="polite"></div>
-        <form id="form-vortex">
-          <label>Message <textarea name="message" rows="3" required maxlength="2000"></textarea></label>
-          <button type="submit">Send</button>
-        </form>
-      </section>
-    </main>
+          <!-- Help -->
+          <section id="view-help" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>Help center</h1>
+                <p>Guides for reporting and tracking neighborhood issues.</p>
+              </div>
+            </div>
+            <div class="help-banner panel">
+              <h2>How can we help?</h2>
+              <label class="search-field">
+                <img src="assets/icon-search.svg" alt="" width="18" height="18" />
+                <input id="help-search" type="search" placeholder="Search help topics" />
+              </label>
+              <p class="muted">Try “photo”, “status”, or “anonymous”.</p>
+            </div>
+            <div class="help-topics" id="help-topics">
+              <article class="panel compact" data-help-topic="reporting">
+                <h3>Reporting an issue</h3>
+                <p class="muted">Sanitation and infrastructure only. Add address, borough, and an optional photo.</p>
+              </article>
+              <article class="panel compact" data-help-topic="status">
+                <h3>Understanding status</h3>
+                <p class="muted">Submitted → reviewed / in progress → done. Canceled still appears in your list.</p>
+              </article>
+              <article class="panel compact" data-help-topic="anonymous">
+                <h3>Anonymous reports</h3>
+                <p class="muted">Use Anonymous Report before signing in. Those reports are not tied to your account history.</p>
+              </article>
+              <article class="panel compact" data-help-topic="emergency">
+                <h3>Emergencies</h3>
+                <p class="muted">Call 911 for immediate danger. FixitiNYC is not affiliated with NYC government.</p>
+              </article>
+            </div>
+          </section>
+
+          <!-- Vortex / AI assistant (staff) -->
+          <section id="view-vortex" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>AI assistant</h1>
+                <p>Vortex answers from live report data. Chats are saved and reloadable.</p>
+              </div>
+            </div>
+            <div class="content-split vortex-layout">
+              <aside class="side-stack vortex-history-panel">
+                <div class="panel compact">
+                  <div class="chat-history-head">
+                    <h3>Chats</h3>
+                    <button type="button" class="btn-secondary btn-small" id="btn-vortex-new">New chat</button>
+                  </div>
+                  <div id="vortex-conversations" class="conversation-list"></div>
+                </div>
+                <div class="panel compact">
+                  <h3>Suggested questions</h3>
+                  <div class="suggest-list" id="vortex-suggestions">
+                    <button type="button" data-suggest="How many high-priority reports are open?">How many high-priority reports are open?</button>
+                    <button type="button" data-suggest="Summarize sanitation issues in Brooklyn.">Summarize sanitation issues in Brooklyn.</button>
+                    <button type="button" data-suggest="Which reports were submitted today?">Which reports were submitted today?</button>
+                    <button type="button" data-suggest="What is the status mix across boroughs?">What is the status mix across boroughs?</button>
+                  </div>
+                </div>
+              </aside>
+              <div class="panel chat-panel">
+                <div class="chat-header">
+                  <div class="assistant-avatar"><img src="assets/icon-chat.svg" alt="" width="24" height="24" /></div>
+                  <div>
+                    <h2>Vortex</h2>
+                    <p class="muted" id="vortex-thread-label">Staff assistance workspace</p>
+                  </div>
+                  <button type="button" class="btn-secondary btn-small" id="btn-vortex-reload">Reload</button>
+                </div>
+                <div id="vortex-log" class="chat-log" aria-live="polite"></div>
+                <form id="form-vortex" class="composer">
+                  <input name="message" maxlength="2000" required placeholder="Ask about reports, boroughs, or priorities…" />
+                  <button type="submit" class="send-btn" aria-label="Send">
+                    <img src="assets/icon-send.svg" alt="" width="18" height="18" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <!-- Staff: all reports -->
+          <section id="view-staff-reports" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>All reports</h1>
+                <p>Every submission, including anonymous rows.</p>
+              </div>
+            </div>
+            <form id="form-staff-filters" class="panel filters-grid">
+              <label class="field">
+                <span>City</span>
+                <select name="city">
+                  <option value="">(any)</option>
+                  <option value="Manhattan">Manhattan</option>
+                  <option value="Brooklyn">Brooklyn</option>
+                  <option value="Queens">Queens</option>
+                  <option value="Bronx">Bronx</option>
+                  <option value="Staten Island">Staten Island</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Problem</span>
+                <select name="problem_type">
+                  <option value="">(any)</option>
+                  <option value="sanitation">sanitation</option>
+                  <option value="infrastructure">infrastructure</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Status</span>
+                <select name="status">
+                  <option value="">(any)</option>
+                  <option value="submitted">submitted</option>
+                  <option value="reviewed">reviewed</option>
+                  <option value="in_progress">in_progress</option>
+                  <option value="canceled">canceled</option>
+                  <option value="done">done</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Priority</span>
+                <select name="priority">
+                  <option value="">(any)</option>
+                  <option value="high">high</option>
+                  <option value="low">low</option>
+                </select>
+              </label>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">Apply filters</button>
+              </div>
+            </form>
+            <div id="staff-reports-list" class="panel report-list wide"></div>
+            <div id="staff-report-detail" class="panel report-detail-slot"></div>
+          </section>
+
+          <!-- Staff summary -->
+          <section id="view-staff-summary" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>Summary</h1>
+                <p>Uses the same filters as All reports when set.</p>
+              </div>
+              <button type="button" id="btn-load-summary" class="btn-secondary">Reload summary</button>
+            </div>
+            <div id="summary-output" class="summary-board"></div>
+          </section>
+
+          <!-- Staff accounts -->
+          <section id="view-staff-accounts" class="view hidden">
+            <div class="page-intro">
+              <div>
+                <h1>Accounts</h1>
+                <p>View and update resident and staff profiles.</p>
+              </div>
+            </div>
+            <button type="button" id="btn-load-accounts" class="btn-secondary">Reload</button>
+            <div id="accounts-list" class="panel"></div>
+            <div id="account-detail" class="panel report-detail-slot"></div>
+          </section>
+
+          <footer class="service-footer">
+            <p>© 2026 FixitiNYC · Independent platform, not affiliated with NYC government.</p>
+            <div>
+              <button type="button" class="inline-link" data-legal="privacy">Privacy</button>
+              <button type="button" class="inline-link" data-legal="terms">Terms</button>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+
+    <dialog id="legal-dialog">
+      <form method="dialog" class="legal-box">
+        <h2 id="legal-title">Privacy</h2>
+        <p id="legal-body"></p>
+        <button type="submit" class="btn-primary">Close</button>
+      </form>
+    </dialog>
 
     <script src="app.js"></script>
   </body>

@@ -52,4 +52,4 @@ Live auth/reports need a valid `.env` with Supabase keys. Without keys the API w
 - Settings: `PATCH /settings`, `POST /settings/password`
 - Client reports: `POST /reports`, `GET /reports`, `GET /reports/{id}`
 - Staff: `GET /staff/reports`, `GET /staff/reports/summary`, `GET|PATCH /staff/reports/{id}`, `GET|PATCH /staff/accounts[...]`
-- Vortex (staff): `GET /vortex/transcript`, `POST /vortex/chat` (turns persist in `vortex_messages`)
+- Vortex (staff): `GET /vortex/conversations`, `POST /vortex/conversations`, `GET /vortex/transcript`, `POST /vortex/chat` (turns persist in `vortex_messages`)

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timezone
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import StructuredTool
@@ -29,6 +30,9 @@ from fixitnyc.schemas import (
     ReportStatus,
     VortexChatRequest,
     VortexChatResponse,
+    VortexConversationSummary,
+    VortexConversationsResponse,
+    VortexNewConversationResponse,
     VortexTranscriptMessage,
     VortexTranscriptResponse,
 )
@@ -292,24 +296,7 @@ def _message_text(message: Any) -> str:
     return str(content)
 
 
-def _latest_conversation_id(user_client: Client, staff_id: UUID) -> UUID | None:
-    existing = (
-        user_client.table("vortex_conversations")
-        .select("id")
-        .eq("staff_id", str(staff_id))
-        .order("created_at", desc=True)
-        .limit(1)
-        .execute()
-    )
-    rows = existing.data or []
-    return UUID(rows[0]["id"]) if rows else None
-
-
-def _ensure_conversation(user_client: Client, staff_id: UUID) -> UUID:
-    existing_id = _latest_conversation_id(user_client, staff_id)
-    if existing_id is not None:
-        return existing_id
-
+def _create_conversation(user_client: Client, staff_id: UUID) -> UUID:
     created = (
         user_client.table("vortex_conversations")
         .insert({"staff_id": str(staff_id)})
@@ -322,6 +309,58 @@ def _ensure_conversation(user_client: Client, staff_id: UUID) -> UUID:
             detail="Failed to create Vortex conversation",
         )
     return UUID(created_rows[0]["id"])
+
+
+def _latest_conversation_id(user_client: Client, staff_id: UUID) -> UUID | None:
+    existing = (
+        user_client.table("vortex_conversations")
+        .select("id")
+        .eq("staff_id", str(staff_id))
+        .order("updated_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    rows = existing.data or []
+    return UUID(rows[0]["id"]) if rows else None
+
+
+def _get_owned_conversation(
+    user_client: Client,
+    staff_id: UUID,
+    conversation_id: UUID,
+) -> UUID:
+    result = (
+        user_client.table("vortex_conversations")
+        .select("id")
+        .eq("id", str(conversation_id))
+        .eq("staff_id", str(staff_id))
+        .limit(1)
+        .execute()
+    )
+    rows = result.data or []
+    if not rows:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found",
+        )
+    return UUID(rows[0]["id"])
+
+
+def _ensure_conversation(user_client: Client, staff_id: UUID) -> UUID:
+    existing_id = _latest_conversation_id(user_client, staff_id)
+    if existing_id is not None:
+        return existing_id
+    return _create_conversation(user_client, staff_id)
+
+
+def _resolve_conversation(
+    user_client: Client,
+    staff_id: UUID,
+    conversation_id: UUID | None,
+) -> UUID:
+    if conversation_id is not None:
+        return _get_owned_conversation(user_client, staff_id, conversation_id)
+    return _ensure_conversation(user_client, staff_id)
 
 
 def _fetch_transcript_rows(
@@ -361,6 +400,13 @@ def _load_history(user_client: Client, conversation_id: UUID) -> list[HumanMessa
     return history
 
 
+def _touch_conversation(user_client: Client, conversation_id: UUID) -> None:
+    # Bump updated_at so "latest chat" / conversation list sort by recent activity.
+    user_client.table("vortex_conversations").update(
+        {"updated_at": datetime.now(timezone.utc).isoformat()}
+    ).eq("id", str(conversation_id)).execute()
+
+
 def _persist_turn(
     user_client: Client,
     conversation_id: UUID,
@@ -381,9 +427,16 @@ def _persist_turn(
             },
         ]
     ).execute()
+    _touch_conversation(user_client, conversation_id)
 
 
-def run_vortex_turn(*, user_client: Client, staff_id: UUID, message: str) -> tuple[UUID, str]:
+def run_vortex_turn(
+    *,
+    user_client: Client,
+    staff_id: UUID,
+    message: str,
+    conversation_id: UUID | None = None,
+) -> tuple[UUID, str]:
     settings = get_settings()
     if not settings.anthropic_api_key:
         raise HTTPException(
@@ -396,7 +449,7 @@ def run_vortex_turn(*, user_client: Client, staff_id: UUID, message: str) -> tup
             detail=f"Message exceeds {settings.vortex_max_message_chars} characters",
         )
 
-    conversation_id = _ensure_conversation(user_client, staff_id)
+    conversation_id = _resolve_conversation(user_client, staff_id, conversation_id)
     history = _load_history(user_client, conversation_id)
     tools = _build_tools(user_client, settings.vortex_report_row_cap)
     tools_by_name = {tool.name: tool for tool in tools}
@@ -458,25 +511,88 @@ def run_vortex_turn(*, user_client: Client, staff_id: UUID, message: str) -> tup
     return conversation_id, reply_text
 
 
+@router.get("/conversations", response_model=VortexConversationsResponse)
+def list_vortex_conversations(
+    current_user: Annotated[CurrentUser, Depends(require_staff)],
+) -> VortexConversationsResponse:
+    """List the staff member's recent Vortex conversations (most recent first)."""
+    result = (
+        current_user.user_client.table("vortex_conversations")
+        .select("id, created_at, updated_at")
+        .eq("staff_id", str(current_user.id))
+        .order("updated_at", desc=True)
+        .limit(20)
+        .execute()
+    )
+    rows = result.data or []
+    if not rows:
+        return VortexConversationsResponse(conversations=[])
+
+    conversation_ids = [str(row["id"]) for row in rows]
+    messages = (
+        current_user.user_client.table("vortex_messages")
+        .select("conversation_id, role, content, created_at")
+        .in_("conversation_id", conversation_ids)
+        .eq("role", "user")
+        .order("created_at", desc=False)
+        .execute()
+    )
+    preview_by_id: dict[str, str] = {}
+    for message in messages.data or []:
+        cid = str(message["conversation_id"])
+        if cid not in preview_by_id:
+            preview = str(message.get("content") or "").strip().replace("\n", " ")
+            preview_by_id[cid] = preview[:80] + ("…" if len(preview) > 80 else "")
+
+    return VortexConversationsResponse(
+        conversations=[
+            VortexConversationSummary(
+                id=row["id"],
+                created_at=row.get("created_at"),
+                updated_at=row.get("updated_at"),
+                preview=preview_by_id.get(str(row["id"])) or "New chat",
+            )
+            for row in rows
+        ]
+    )
+
+
+@router.post("/conversations", response_model=VortexNewConversationResponse)
+def create_vortex_conversation(
+    current_user: Annotated[CurrentUser, Depends(require_staff)],
+) -> VortexNewConversationResponse:
+    """Start a new empty Vortex conversation (Gemini-style New chat)."""
+    conversation_id = _create_conversation(current_user.user_client, current_user.id)
+    return VortexNewConversationResponse(conversation_id=conversation_id)
+
+
 @router.get("/transcript", response_model=VortexTranscriptResponse)
 def vortex_transcript(
     current_user: Annotated[CurrentUser, Depends(require_staff)],
+    conversation_id: Annotated[UUID | None, Query()] = None,
 ) -> VortexTranscriptResponse:
-    """Return the staff member's saved Vortex chat transcript."""
-    conversation_id = _latest_conversation_id(
-        current_user.user_client,
-        current_user.id,
-    )
-    if conversation_id is None:
-        return VortexTranscriptResponse(conversation_id=None, messages=[])
+    """Return a saved Vortex chat transcript (latest, or a specific conversation)."""
+    if conversation_id is not None:
+        resolved_id = _get_owned_conversation(
+            current_user.user_client,
+            current_user.id,
+            conversation_id,
+        )
+    else:
+        resolved_id = _latest_conversation_id(
+            current_user.user_client,
+            current_user.id,
+        )
+        if resolved_id is None:
+            return VortexTranscriptResponse(conversation_id=None, messages=[])
 
     rows = _fetch_transcript_rows(
         current_user.user_client,
-        conversation_id,
+        resolved_id,
         limit=200,
     )
     return VortexTranscriptResponse(
-        conversation_id=conversation_id,
+        conversation_id=resolved_id,
         messages=[
             VortexTranscriptMessage(
                 role=row["role"],
@@ -493,16 +609,12 @@ def vortex_chat(
     body: VortexChatRequest,
     current_user: Annotated[CurrentUser, Depends(require_staff)],
 ) -> VortexChatResponse:
-    # conversation_id is accepted for forward compatibility; we continue the
-    # staff member's latest thread.
-    if body.conversation_id is not None:
-        _ = UUID(str(body.conversation_id))
-
     try:
         conversation_id, reply = run_vortex_turn(
             user_client=current_user.user_client,
             staff_id=current_user.id,
             message=body.message.strip(),
+            conversation_id=body.conversation_id,
         )
     except HTTPException:
         raise

@@ -55,14 +55,14 @@ async def read_and_validate_image(image: UploadFile, settings: Settings) -> tupl
 
 def upload_report_image(
     *,
-    user_id: UUID,
+    owner_folder: str,
     report_id: UUID,
     data: bytes,
     content_type: str,
 ) -> str:
     settings = get_settings()
     extension = ALLOWED_IMAGE_TYPES[content_type]
-    path = f"{user_id}/{report_id}{extension}"
+    path = f"{owner_folder}/{report_id}{extension}"
     get_service_client().storage.from_(settings.report_image_bucket).upload(
         path,
         data,
@@ -84,25 +84,29 @@ def signed_image_url(image_path: str | None) -> str | None:
 
 
 def attach_reporter_profiles(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Add reporter_email / reporter_full_name from profiles (in place)."""
+    """Add reporter_email / reporter_full_name from profiles (in place).
+
+    Anonymous rows (null reporter_id) fall back to contact_email for reporter_email.
+    """
     reporter_ids = sorted(
         {str(row["reporter_id"]) for row in rows if row.get("reporter_id")}
     )
-    if not reporter_ids:
-        return rows
+    by_id: dict[str, dict[str, Any]] = {}
+    if reporter_ids:
+        result = (
+            get_service_client()
+            .table("profiles")
+            .select("id,email,full_name")
+            .in_("id", reporter_ids)
+            .execute()
+        )
+        by_id = {str(profile["id"]): profile for profile in (result.data or [])}
 
-    result = (
-        get_service_client()
-        .table("profiles")
-        .select("id,email,full_name")
-        .in_("id", reporter_ids)
-        .execute()
-    )
-    by_id = {str(profile["id"]): profile for profile in (result.data or [])}
     for row in rows:
-        profile = by_id.get(str(row.get("reporter_id")))
+        reporter_id = row.get("reporter_id")
+        profile = by_id.get(str(reporter_id)) if reporter_id else None
         if profile is None:
-            row["reporter_email"] = None
+            row["reporter_email"] = row.get("contact_email")
             row["reporter_full_name"] = None
             continue
         row["reporter_email"] = profile.get("email")
@@ -158,8 +162,12 @@ def build_summary(rows: list[dict[str, Any]]) -> StaffSummaryResponse:
             for key, count in sorted(counter.items(), key=lambda item: item[0])
         ]
 
+    def city_key(row: dict[str, Any]) -> str:
+        city = row.get("city")
+        return str(city) if city else "unspecified"
+
     return StaffSummaryResponse(
-        by_city=buckets(Counter(row["city"] for row in rows)),
+        by_city=buckets(Counter(city_key(row) for row in rows)),
         by_problem_type=buckets(Counter(row["problem_type"] for row in rows)),
         by_status=buckets(Counter(row["status"] for row in rows)),
         by_day=buckets(

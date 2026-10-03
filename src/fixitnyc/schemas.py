@@ -83,14 +83,15 @@ class PasswordChangeRequest(BaseModel):
 
 class ReportListItem(BaseModel):
     id: UUID
-    reporter_id: UUID
-    address_area: str
-    city: City
+    reporter_id: UUID | None = None
+    address_area: str | None = None
+    city: City | None = None
     name: str
     problem_type: ProblemType
     image_path: str | None = None
     reported_at: datetime
     additional_info: str | None = None
+    contact_email: str | None = None
     status: ReportStatus
     priority: Priority
     reporter_email: str | None = None
@@ -143,3 +144,18 @@ class VortexTranscriptMessage(BaseModel):
 class VortexTranscriptResponse(BaseModel):
     conversation_id: UUID | None = None
     messages: list[VortexTranscriptMessage]
+
+
+class VortexConversationSummary(BaseModel):
+    id: UUID
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    preview: str | None = None
+
+
+class VortexConversationsResponse(BaseModel):
+    conversations: list[VortexConversationSummary]
+
+
+class VortexNewConversationResponse(BaseModel):
+    conversation_id: UUID
