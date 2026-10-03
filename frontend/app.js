@@ -251,6 +251,7 @@
   }
 
   function showAuth(panel = "login") {
+    closeNav();
     $("shell-app").classList.add("hidden");
     $("shell-auth").classList.remove("hidden");
     ["login", "register", "anonymous", "public-help"].forEach((name) => {
@@ -302,14 +303,30 @@
     loadDashboard().catch((err) => setStatus(err.message, true));
   }
 
+  function setNavOpen(open) {
+    const shell = $("shell-app");
+    const toggle = $("btn-nav-toggle");
+    const backdrop = $("sidebar-backdrop");
+    if (!shell) return;
+    shell.classList.toggle("nav-open", open);
+    document.body.classList.toggle("nav-open", open);
+    if (toggle) toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    if (backdrop) backdrop.hidden = !open;
+  }
+
+  function closeNav() {
+    setNavOpen(false);
+  }
+
   function showView(name) {
     document.querySelectorAll(".view").forEach((el) => el.classList.add("hidden"));
     const view = $(`view-${name}`);
     if (view) view.classList.remove("hidden");
-    document.querySelectorAll("#nav .nav-item[data-view], .staff-nav .nav-item[data-view]").forEach((btn) => {
+    document.querySelectorAll("#nav .nav-item[data-view], .staff-nav .nav-item[data-view], .sidebar .nav-item[data-view]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-view") === name);
     });
     $("breadcrumb-page").textContent = PAGE_TITLES[name] || name;
+    closeNav();
   }
 
   function countReports(reports) {
@@ -1176,6 +1193,20 @@
     const form = $("form-vortex");
     form.message.value = btn.getAttribute("data-suggest");
     form.requestSubmit();
+  });
+
+  // ---- Mobile nav drawer ----
+  $("btn-nav-toggle")?.addEventListener("click", () => {
+    const open = !$("shell-app").classList.contains("nav-open");
+    setNavOpen(open);
+  });
+  $("btn-nav-close")?.addEventListener("click", closeNav);
+  $("sidebar-backdrop")?.addEventListener("click", closeNav);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeNav();
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) closeNav();
   });
 
   // ---- Navigation ----

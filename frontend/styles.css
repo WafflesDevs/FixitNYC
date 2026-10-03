@@ -26,6 +26,7 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -98,7 +99,7 @@ img {
 
 .auth-layout {
   display: grid;
-  grid-template-columns: minmax(420px, 45%) minmax(0, 55%);
+  grid-template-columns: minmax(min(420px, 100%), 45%) minmax(0, 55%);
   min-height: 100vh;
 }
 
@@ -679,12 +680,61 @@ img {
   overflow: auto;
 }
 
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .sidebar-brand img {
-  width: 180px;
-  height: 58px;
+  width: min(180px, 100%);
+  height: auto;
+  max-height: 58px;
   object-fit: contain;
   object-position: left center;
-  margin: 0 auto;
+  margin: 0;
+}
+
+.nav-close-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--navy);
+  margin-left: 0;
+}
+
+.nav-close-btn:hover {
+  background: var(--accent-soft);
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  flex-shrink: 0;
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--navy);
 }
 
 .workspace-label {
@@ -799,21 +849,42 @@ img {
   margin: 0 auto 12px;
 }
 
+.account-meta {
+  min-width: 0;
+  flex: 1;
+}
+
 .account-name {
   font-size: 14px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .account-role {
   font-size: 12px;
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .icon-btn {
   border: 0;
   background: none;
-  padding: 4px;
+  padding: 8px;
   margin-left: auto;
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.icon-btn:hover {
+  background: var(--accent-soft);
 }
 
 .workspace {
@@ -824,10 +895,11 @@ img {
 }
 
 .workspace-header {
-  height: 80px;
+  min-height: 80px;
   display: flex;
   align-items: center;
-  padding: 0 40px;
+  gap: 14px;
+  padding: 12px 40px;
   background: var(--paper);
   border-bottom: 1px solid var(--line);
 }
@@ -1629,38 +1701,62 @@ dialog::backdrop {
   color: var(--muted);
 }
 
-@media (max-width: 1100px) {
+/* ========== Responsive ========== */
+/* Desktop-narrow / large tablet: keep sidebar, tighten grids */
+@media (max-width: 1280px) {
+  .dash-split,
+  .content-split {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+
+  .vortex-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  .workspace-main,
+  .workspace-header {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .invite-image {
+    width: 280px;
+  }
+}
+
+/* Tablet: stack most two-column layouts; drawer nav */
+@media (max-width: 900px) {
   .auth-layout {
     grid-template-columns: 1fr;
   }
 
   .auth-header {
-    padding: 40px 28px 12px;
+    padding: 36px 28px 12px;
   }
 
   .logo-login {
-    width: 160px;
-    height: 160px;
+    width: clamp(120px, 28vw, 160px);
+    height: clamp(120px, 28vw, 160px);
   }
 
   .auth-main {
-    padding: 8px 24px 24px;
+    padding: 8px 28px 24px;
     max-width: 520px;
     justify-content: flex-start;
   }
 
   .auth-pane-footer {
-    padding: 16px 24px 28px;
+    padding: 16px 28px 28px;
   }
 
   .auth-visual {
     order: 2;
-    min-height: 280px;
-    padding: 8px 24px 28px;
+    min-height: 240px;
+    padding: 8px 28px 28px;
   }
 
   .auth-visual-frame {
-    min-height: 260px;
+    min-height: 220px;
     border-radius: 22px;
   }
 
@@ -1680,26 +1776,71 @@ dialog::backdrop {
     height: 240px;
   }
 
-  .shell-app {
-    flex-direction: column;
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .nav-close-btn {
+    display: inline-flex;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(17, 47, 85, 0.4);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .sidebar-backdrop[hidden] {
+    display: none !important;
   }
 
   .sidebar {
-    width: 100%;
-    height: auto;
-    position: static;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 45;
+    width: min(300px, 88vw);
+    height: 100vh;
+    height: 100dvh;
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    box-shadow: none;
+  }
+
+  .shell-app.nav-open .sidebar {
+    transform: translateX(0);
+    box-shadow: 8px 0 32px rgba(17, 47, 85, 0.18);
+  }
+
+  body.nav-open {
+    overflow: hidden;
   }
 
   .dash-split,
   .content-split,
   .vortex-layout,
-  .status-cards,
   .help-topics,
   .summary-grid,
   .field-row,
-  .filters-grid,
-  .filters-bar {
+  .filters-grid {
     grid-template-columns: 1fr;
+  }
+
+  .status-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filters-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters-bar .search-field {
+    grid-column: 1 / -1;
   }
 
   .invite-card {
@@ -1717,27 +1858,126 @@ dialog::backdrop {
     padding-right: 20px;
   }
 
+  .workspace-header {
+    min-height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .page-intro {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .page-intro h1 {
+    font-size: clamp(1.5rem, 4vw, 1.85rem);
+  }
+
+  .page-date {
+    white-space: normal;
+  }
+
+  .panel-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel-head .btn-primary,
+  .panel-head .text-action {
+    align-self: flex-start;
+  }
+
+  .chat-panel {
+    min-height: min(70vh, 560px);
+  }
+
+  .chat-log {
+    max-height: none;
+    min-height: 220px;
+  }
+
   .brand-tagline {
     display: none;
   }
+
+  .report-list.wide .report-row,
+  .report-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 14px 4px;
+    min-height: 64px;
+  }
+
+  .report-row .issue-cell {
+    flex: 1 1 calc(100% - 36px);
+    order: 1;
+    min-width: 0;
+  }
+
+  .report-row > img:last-child {
+    order: 2;
+    flex: 0 0 auto;
+  }
+
+  .report-row > .mono {
+    display: none;
+  }
+
+  .report-row > div:not(.issue-cell) {
+    order: 3;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .report-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary {
+    flex: 1 1 auto;
+    min-width: min(100%, 140px);
+  }
 }
 
+/* Phone */
 @media (max-width: 640px) {
   .auth-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-    padding: 32px 20px 8px;
+    padding: 24px 16px 8px;
   }
 
   .logo-login {
-    width: 148px;
-    height: 148px;
+    width: clamp(96px, 30vw, 132px);
+    height: clamp(96px, 30vw, 132px);
   }
 
   .auth-header-links {
     width: 100%;
     margin-top: 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px 10px;
+  }
+
+  .auth-pill-link {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .auth-text-link {
+    min-height: 44px;
+    padding: 8px 6px;
   }
 
   .auth-visual {
@@ -1745,10 +1985,157 @@ dialog::backdrop {
   }
 
   .auth-main {
-    padding: 8px 20px 20px;
+    padding: 4px 16px 20px;
+    max-width: none;
   }
 
   .auth-pane-footer {
-    padding: 12px 20px 24px;
+    padding: 12px 16px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sign-intro h1 {
+    font-size: clamp(1.55rem, 7vw, 1.9rem);
+  }
+
+  .auth-mode-tab {
+    min-height: 44px;
+    font-size: 13px;
+  }
+
+  .status-cards,
+  .help-topics,
+  .summary-grid,
+  .filters-bar,
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-card {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .metric span:first-child {
+    font-size: 24px;
+  }
+
+  .workspace-main {
+    padding: 20px 16px 32px;
+  }
+
+  .workspace-header {
+    padding: 10px 16px;
+  }
+
+  .breadcrumb-root,
+  .breadcrumb-sep {
+    display: none;
+  }
+
+  .invite-copy {
+    padding: 20px;
+  }
+
+  .invite-copy h2 {
+    font-size: 22px;
+  }
+
+  .invite-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .invite-actions .btn-primary {
+    width: 100%;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .chat-header {
+    flex-wrap: wrap;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .chat-header .btn-secondary {
+    margin-left: 0;
+  }
+
+  .chat-panel {
+    min-height: calc(100dvh - 180px);
+  }
+
+  .chat-log {
+    padding: 16px;
+  }
+
+  .composer {
+    padding: 14px 16px 16px;
+    align-items: center;
+  }
+
+  .composer input {
+    min-height: 48px;
+  }
+
+  .send-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .msg {
+    max-width: 100%;
+  }
+
+  .service-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .issue-sub {
+    white-space: normal;
+  }
+
+  .report-image {
+    max-width: 100%;
+  }
+
+  .toast {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+
+  dialog {
+    width: calc(100vw - 32px);
+    max-width: 480px;
+  }
+
+  .support-card {
+    display: none;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .auth-header-links {
+    gap: 6px;
+  }
+
+  .auth-pill-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 15px;
+    padding: 0 14px;
   }
 }

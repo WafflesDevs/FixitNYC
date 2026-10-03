@@ -220,10 +220,14 @@
 
     <!-- ========== Signed-in app ========== -->
     <div id="shell-app" class="shell-app hidden">
-      <aside class="sidebar" aria-label="Main navigation">
+      <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+      <aside id="sidebar" class="sidebar" aria-label="Main navigation">
         <div class="sidebar-main">
           <div class="sidebar-brand">
             <img src="assets/logo.png" alt="FixIt NYC" width="180" height="58" />
+            <button type="button" id="btn-nav-close" class="icon-btn nav-close-btn" aria-label="Close menu">
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
           <div class="workspace-label">Resident workspace</div>
           <nav id="nav" class="nav-links">
@@ -292,9 +296,14 @@
 
       <div class="workspace">
         <header class="workspace-header">
+          <button type="button" id="btn-nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+            <span class="nav-toggle-bar" aria-hidden="true"></span>
+            <span class="nav-toggle-bar" aria-hidden="true"></span>
+            <span class="nav-toggle-bar" aria-hidden="true"></span>
+          </button>
           <div class="breadcrumb">
-            <span>Workspace</span>
-            <img src="assets/icon-chevron-right.svg" alt="" width="14" height="14" />
+            <span class="breadcrumb-root">Workspace</span>
+            <img class="breadcrumb-sep" src="assets/icon-chevron-right.svg" alt="" width="14" height="14" />
             <strong id="breadcrumb-page">Dashboard</strong>
           </div>
         </header>
