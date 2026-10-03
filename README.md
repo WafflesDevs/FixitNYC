@@ -53,3 +53,31 @@ Live auth/reports need a valid `.env` with Supabase keys. Without keys the API w
 - Client reports: `POST /reports`, `GET /reports`, `GET /reports/{id}`
 - Staff: `GET /staff/reports`, `GET /staff/reports/summary`, `GET|PATCH /staff/reports/{id}`, `GET|PATCH /staff/accounts[...]`
 - Vortex (staff): `GET /vortex/conversations`, `POST /vortex/conversations`, `GET /vortex/transcript`, `POST /vortex/chat` (turns persist in `vortex_messages`)
+- Health: `GET /health`
+
+## Deploy on Render
+
+This repo includes a Blueprint (`render.yaml`), optional `Dockerfile`, and `Procfile`.
+
+1. Push to GitHub (`main`).
+2. In [Render](https://dashboard.render.com): **New → Blueprint** and select this repo, **or** **New → Web Service** with:
+   - Runtime: Python
+   - Build: `uv sync --frozen`
+   - Start: `uv run uvicorn fixitnyc.main:app --host 0.0.0.0 --port $PORT`
+   - Health check path: `/health`
+3. Set these environment variables (from `.env.example`; do not commit `.env`):
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `SUPABASE_URL` | yes | Supabase project URL |
+| `SUPABASE_PUBLISHABLE_KEY` | yes | Publishable / anon key |
+| `SUPABASE_SECRET_KEY` | yes | Service role — server only |
+| `ANTHROPIC_API_KEY` | for Vortex | Chat fails without it |
+| `VORTEX_MODEL` | no | Default `claude-haiku-4-5` |
+| `BOOTSTRAP_STAFF_EMAILS` | no | Comma-separated staff emails |
+| `CORS_ORIGINS` | no | Extra origins; `/ui` is same-origin |
+| `PYTHON_VERSION` | no | Blueprint sets `3.14.0` |
+
+Open the service URL (UI at `/ui/`, docs at `/docs`).
+
+**Note:** `pyproject.toml` includes `torch` / `torchvision` / `scikit-learn`. Builds are large and may exceed free-tier disk/time; upgrade the instance or trim unused ML deps if the build fails.
