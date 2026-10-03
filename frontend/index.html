@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FixItNYC Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>FixItNYC</h1>
+      <p class="muted">Functional prototype UI</p>
+      <div id="session-bar" class="hidden">
+        <span id="session-label"></span>
+        <button type="button" id="btn-logout">Logout</button>
+      </div>
+    </header>
+
+    <nav id="nav" class="hidden">
+      <button type="button" data-view="me">Me</button>
+      <button type="button" data-view="settings">Settings</button>
+      <button type="button" data-view="submit">Submit report</button>
+      <button type="button" data-view="my-reports">My reports</button>
+      <button type="button" data-view="staff-reports" class="staff-only hidden">All reports</button>
+      <button type="button" data-view="staff-summary" class="staff-only hidden">Summary</button>
+      <button type="button" data-view="staff-accounts" class="staff-only hidden">Accounts</button>
+      <button type="button" data-view="vortex" class="staff-only hidden">Vortex</button>
+    </nav>
+
+    <main>
+      <p id="status" class="status" role="status"></p>
+
+      <section id="view-auth" class="view">
+        <h2>Login</h2>
+        <form id="form-login">
+          <label>Email <input name="email" type="email" required /></label>
+          <label>Password <input name="password" type="password" required /></label>
+          <button type="submit">Login</button>
+        </form>
+
+        <h2>Register</h2>
+        <form id="form-register">
+          <label>Full name <input name="full_name" required maxlength="200" /></label>
+          <label>Email <input name="email" type="email" required /></label>
+          <label>Password <input name="password" type="password" required minlength="8" /></label>
+          <button type="submit">Register</button>
+        </form>
+        <p class="muted">Staff bootstrap emails are configured server-side via BOOTSTRAP_STAFF_EMAILS.</p>
+      </section>
+
+      <section id="view-me" class="view hidden">
+        <h2>Current user</h2>
+        <pre id="me-output"></pre>
+        <button type="button" id="btn-refresh-me">Refresh /auth/me</button>
+      </section>
+
+      <section id="view-settings" class="view hidden">
+        <h2>Update profile</h2>
+        <form id="form-settings">
+          <label>Full name <input name="full_name" maxlength="200" /></label>
+          <label>Email <input name="email" type="email" /></label>
+          <button type="submit">Save</button>
+        </form>
+
+        <h2>Change password</h2>
+        <form id="form-password">
+          <label>New password <input name="password" type="password" required minlength="8" /></label>
+          <button type="submit">Update password</button>
+        </form>
+      </section>
+
+      <section id="view-submit" class="view hidden">
+        <h2>Submit report</h2>
+        <form id="form-report">
+          <label>Address / area <input name="address_area" required maxlength="500" /></label>
+          <label>
+            City (borough)
+            <select name="city" required>
+              <option value="Manhattan">Manhattan</option>
+              <option value="Brooklyn">Brooklyn</option>
+              <option value="Queens">Queens</option>
+              <option value="Bronx">Bronx</option>
+              <option value="Staten Island">Staten Island</option>
+            </select>
+          </label>
+          <label>Name <input name="name" required maxlength="200" /></label>
+          <label>
+            Problem type
+            <select name="problem_type" required>
+              <option value="sanitation">sanitation</option>
+              <option value="infrastructure">infrastructure</option>
+            </select>
+          </label>
+          <label>Additional info <textarea name="additional_info" rows="3"></textarea></label>
+          <label>Image (jpeg/png/webp) <input name="image" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+          <button type="submit">Submit</button>
+        </form>
+        <pre id="submit-output"></pre>
+      </section>
+
+      <section id="view-my-reports" class="view hidden">
+        <h2>My reports</h2>
+        <button type="button" id="btn-load-my-reports">Reload</button>
+        <div id="my-reports-list"></div>
+        <h3>Report detail</h3>
+        <div id="my-report-detail"></div>
+      </section>
+
+      <section id="view-staff-reports" class="view hidden">
+        <h2>All reports</h2>
+        <p class="muted">Every submitted report across all users. Open one to view the image and update priority/status.</p>
+        <form id="form-staff-filters" class="filters">
+          <label>
+            City
+            <select name="city">
+              <option value="">(any)</option>
+              <option value="Manhattan">Manhattan</option>
+              <option value="Brooklyn">Brooklyn</option>
+              <option value="Queens">Queens</option>
+              <option value="Bronx">Bronx</option>
+              <option value="Staten Island">Staten Island</option>
+            </select>
+          </label>
+          <label>
+            Problem
+            <select name="problem_type">
+              <option value="">(any)</option>
+              <option value="sanitation">sanitation</option>
+              <option value="infrastructure">infrastructure</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select name="status">
+              <option value="">(any)</option>
+              <option value="submitted">submitted</option>
+              <option value="reviewed">reviewed</option>
+              <option value="in_progress">in_progress</option>
+              <option value="canceled">canceled</option>
+              <option value="done">done</option>
+            </select>
+          </label>
+          <label>
+            Priority
+            <select name="priority">
+              <option value="">(any)</option>
+              <option value="high">high</option>
+              <option value="low">low</option>
+            </select>
+          </label>
+          <label>Reported after <input name="reported_after" type="datetime-local" /></label>
+          <label>Reported before <input name="reported_before" type="datetime-local" /></label>
+          <button type="submit">Apply filters</button>
+        </form>
+        <div id="staff-reports-list"></div>
+        <h3>Report detail</h3>
+        <div id="staff-report-detail"></div>
+      </section>
+
+      <section id="view-staff-summary" class="view hidden">
+        <h2>Summary</h2>
+        <p class="muted">Uses the same filters as All reports (apply filters there first, or reload here).</p>
+        <button type="button" id="btn-load-summary">Load summary</button>
+        <pre id="summary-output"></pre>
+      </section>
+
+      <section id="view-staff-accounts" class="view hidden">
+        <h2>Accounts</h2>
+        <button type="button" id="btn-load-accounts">Reload</button>
+        <div id="accounts-list"></div>
+        <h3>Account detail / update</h3>
+        <div id="account-detail"></div>
+      </section>
+
+      <section id="view-vortex" class="view hidden">
+        <h2>Vortex chat</h2>
+        <p class="muted">Transcript is saved and restored. Replies render as notes from live report data.</p>
+        <div id="vortex-log" class="chat-log" aria-live="polite"></div>
+        <form id="form-vortex">
+          <label>Message <textarea name="message" rows="3" required maxlength="2000"></textarea></label>
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

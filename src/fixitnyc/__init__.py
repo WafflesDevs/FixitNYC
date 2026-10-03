@@ -1,2 +1,9 @@
 def main() -> None:
-    print("Hello from fixitnyc!")
+    import uvicorn
+
+    uvicorn.run(
+        "fixitnyc.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )

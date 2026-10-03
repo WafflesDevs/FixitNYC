@@ -1,11 +1,21 @@
 [project]
 name = "fixitnyc"
 version = "0.1.0"
-description = "Add your description here"
+description = "FixItNYC FastAPI backend for NYC issue reports"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "email-validator>=2.3.0",
+    "fastapi>=0.142.2",
+    "langchain>=1.4.3",
+    "langchain-anthropic>=1.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyjwt>=2.0.0",
+    "python-multipart>=0.0.9",
+    "scikit-learn>=1.9.1",
+    "supabase>=2.0.0",
     "torch>=2.14.1",
+    "uvicorn[standard]>=0.30.0",
 ]
 
 [project.scripts]

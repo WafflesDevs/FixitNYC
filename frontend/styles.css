@@ -1,0 +1,252 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 1rem 1.25rem 2rem;
+  line-height: 1.4;
+  color: #111;
+  background: #f7f7f7;
+}
+
+header,
+nav,
+main,
+section {
+  max-width: 960px;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.muted {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+#session-bar {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0;
+}
+
+nav button {
+  cursor: pointer;
+}
+
+section.view {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+form {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 480px;
+  margin-bottom: 1rem;
+}
+
+form.filters {
+  max-width: none;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  align-items: end;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.95rem;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  padding: 0.35rem 0.45rem;
+}
+
+button {
+  cursor: pointer;
+  width: fit-content;
+}
+
+.status {
+  min-height: 1.25rem;
+  color: #063;
+  white-space: pre-wrap;
+}
+
+.status.error {
+  color: #900;
+}
+
+.hidden {
+  display: none !important;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 0.75rem 0;
+  background: #fff;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 0.35rem 0.45rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eee;
+}
+
+pre {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.chat-log {
+  border: 1px solid #ccc;
+  background: #fafafa;
+  min-height: 180px;
+  max-height: 480px;
+  overflow: auto;
+  padding: 0.85rem;
+  margin-bottom: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.chat-log .msg {
+  margin: 0;
+}
+
+.chat-log .role {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  color: #444;
+}
+
+.msg-user .msg-body {
+  white-space: pre-wrap;
+}
+
+.vortex-note {
+  background: #fffdf6;
+  border: 1px solid #e2d9b8;
+  border-left: 4px solid #c4a35a;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+
+.vortex-note-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b5a2e;
+  margin-bottom: 0.45rem;
+  font-weight: 650;
+}
+
+.vortex-note-body {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #1d1d1d;
+}
+
+.vortex-note-body p {
+  margin: 0 0 0.55rem;
+}
+
+.vortex-note-body p:last-child {
+  margin-bottom: 0;
+}
+
+.vortex-note-list {
+  margin: 0 0 0.55rem;
+  padding-left: 1.15rem;
+}
+
+.vortex-note-list:last-child {
+  margin-bottom: 0;
+}
+
+.vortex-note-list li {
+  margin: 0.15rem 0;
+}
+
+.report-detail {
+  display: grid;
+  gap: 1rem;
+}
+
+.report-meta {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.report-meta > div {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.5rem;
+}
+
+.report-meta dt {
+  font-weight: 600;
+  margin: 0;
+}
+
+.report-meta dd {
+  margin: 0;
+}
+
+.report-figure {
+  margin: 0;
+}
+
+img.report-image {
+  max-width: 100%;
+  max-height: 420px;
+  display: block;
+  margin-top: 0.5rem;
+  border: 1px solid #ccc;
+  object-fit: contain;
+  background: #f7f7f7;
+}
+
+.report-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
