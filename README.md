@@ -1,6 +1,6 @@
 # FixItNYC API
 
-FastAPI backend for NYC issue reporting with Supabase Auth, staff queues, and Vortex chat.
+MY first ever hackathon project! Hope you enjoy
 
 ## Setup
 
