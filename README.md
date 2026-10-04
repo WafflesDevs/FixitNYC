@@ -2,6 +2,8 @@
 
 MY first ever hackathon project! Hope you enjoy
 
+Live: https://fixitnyc.onrender.com/ui/
+
 ## Setup
 
 1. Copy `.env.example` to `.env` and fill in values from the FixitNYC Supabase project:
