@@ -251,16 +251,24 @@ img {
 
 .auth-pane-footer {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
   padding: 20px 56px 36px;
   color: var(--muted);
   font-size: 12px;
 }
 
-.auth-pane-footer p {
+.auth-footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  width: 100%;
+}
+
+.auth-footer-meta p {
   margin: 0;
   max-width: 320px;
   line-height: 1.45;
@@ -269,6 +277,67 @@ img {
 .auth-footer-links {
   display: flex;
   gap: 20px;
+}
+
+/* Team credits — visible on login + app */
+.credits-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e8eef5 0%, #eef5f0 100%);
+  border: 1px solid #c5d3e2;
+  box-shadow: 0 1px 0 rgba(17, 47, 85, 0.04);
+}
+
+.credits-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.credits-names {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.credits-tag {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  opacity: 0.85;
+}
+
+.credits-tag::before {
+  content: "·";
+  margin-right: 8px;
+  opacity: 0.5;
+}
+
+.credits-block--sidebar {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+}
+
+.credits-block--sidebar .credits-tag::before {
+  content: none;
+  margin: 0;
+}
+
+.credits-block--inline {
+  flex: 1 1 auto;
+  min-width: min(100%, 280px);
 }
 
 .auth-visual {
@@ -1660,7 +1729,9 @@ th {
 
 .service-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
   margin-top: 36px;
   padding-top: 16px;
@@ -1669,7 +1740,19 @@ th {
   color: var(--muted);
 }
 
-.service-footer div {
+.service-footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.service-footer-meta p {
+  margin: 0;
+}
+
+.service-footer-meta div {
   display: flex;
   gap: 16px;
 }
@@ -2094,7 +2177,7 @@ dialog::backdrop {
 
   .service-footer {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .issue-sub {
